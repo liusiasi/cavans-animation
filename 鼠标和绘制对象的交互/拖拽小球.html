@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>拖拽小球</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //鼠标点击拖拽小球，鼠标点击的时候如果在小球内部，就给canvas画布添加鼠标移动函数和鼠标抬起函数，移动函数设置小球的新的位置，这里有一个
+    //偏差，小球中心位置和鼠标坐标的偏差，dx = mouse.x - ball.x;dy = mouse.y - ball.y;当移动小球中心坐标的时候，也需要减去该偏差。
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let mouse = C.getOffset(canvas);
+    const ball = new Ball({
+      x: W/2,
+      y: H/2,
+      r: 40
+    }).render(ctx);
+
+    let dx = 0, dy = 0
+    canvas.addEventListener('mousedown', function (e){
+      if(ball.isPoint(mouse)){
+        dx = mouse.x - ball.x;
+        dy = mouse.y - ball.y;
+        canvas.addEventListener('mousemove', moveBallFn);
+        canvas.addEventListener('mouseup', upBallFn);
+      }
+    });
+    function moveBallFn(){
+      ball.x = mouse.x - dx;
+      ball.y = mouse.y - dy;
+    }
+    function upBallFn(){
+      canvas.removeEventListener('mousemove', moveBallFn);
+      canvas.removeEventListener('mouseup', upBallFn);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      ball.render(ctx);
+    })()
+
+  </script>
+</html>

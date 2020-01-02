@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>带自由落体运动的拖拽</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //拖拽小球之后，抬起鼠标，让小球有一个自由落体并且能反弹的动画效果,当小球不在拖拽的时候，在动画帧中设置小球自由落体运动，将vy+=g写在前面，维持动能守恒
+    //为了加快x轴方向反弹的次数，最终使小球静置，当小球在y为H-r的时候加入了水平方向的摩擦力。
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    const ball = new Ball({
+      x: W/2,
+      y: H/2,
+      r: 40
+    }).render(ctx);
+
+    let mouse = C.getOffset(canvas);
+    let dx = 0, dy = 0;
+
+    //isMouseMove是否在拖拽，bounce反弹的摩擦系数,
+    let isMouseMove = true;
+    let vx = C.rp([0,10]),vy = -10;
+    let g = 0.2;
+    let bounce = -0.7;
+    let friction = 0.01;
+
+    canvas.addEventListener('mousedown', function (e){
+      if(ball.isPoint(mouse)){
+        isMouseMove = true;
+        dx = mouse.x - ball.x;
+        dy = mouse.y - ball.y;
+        canvas.addEventListener('mousemove', moveBallFn);
+        canvas.addEventListener('mouseup', upBallFn);
+      }
+    });
+    function moveBallFn(){
+      ball.x = mouse.x - dx;
+      ball.y = mouse.y - dy;
+    }
+    function upBallFn(){
+      isMouseMove = false;
+      canvas.removeEventListener('mousemove', moveBallFn);
+      canvas.removeEventListener('mouseup', upBallFn);
+    }
+
+    function bounceMove(){
+      console.log('bounceMove');
+      vy += g;
+      //加入水平方向摩擦力
+      if(ball.y == H - ball.r ){
+        if(vx > 0 && vx - friction > 0){
+          vx -= friction;
+        }else if(vx < 0 && vx + friction < 0){
+          vx += friction
+        }
+      }
+      console.log(vx);
+      ball.x += vx;
+      ball.y += vy;
+
+      if(ball.x + ball.r >= W){
+        ball.x = W - ball.r;
+        vx *= bounce;
+      }else if(ball.x - ball.r <= 0){
+        ball.x = ball.r;
+        vx *= bounce;
+      }
+      
+      if(ball.y + ball.r >= H){
+        ball.y = H - ball.r;
+        vy *= bounce;
+      }else if(ball.y - ball.r <= 0){
+        ball.y = ball.r;
+        vy *= bounce;
+      }
+
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      console.log(isMouseMove);
+      ctx.clearRect(0,0,W,H);
+      if(!isMouseMove){
+        bounceMove();
+      }
+      ball.render(ctx);
+    })()
+
+  </script>
+</html>
