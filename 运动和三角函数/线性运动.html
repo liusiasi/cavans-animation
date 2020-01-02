@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>线性运动</title>
+</head>
+<style >
+  html, body{
+    margin: 0;
+    height: 100%;
+  }
+  #canvas {
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas" ></canvas>
+  <script src='../assets/components/Ball.js'></script>
+  <script src='../assets/script/utils.js'></script>
+  <script>
+    // 模拟sin函数运动，x轴均匀移动，y轴按照sin曲线移动
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    let angle = 0;
+    let vx = 1;
+
+    let vy =0.01;
+    const SWING = 120;
+
+    const ball = new Ball({
+      x: 100,
+      y: H/2,
+    }).render(ctx);
+
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      angle += vy;
+      angle　%= Math.PI * 2;
+      ball.y = H/2 + Math.sin(angle) * SWING;
+      ball.x += vx;
+      ball.render(ctx);
+    })()
+  </script>
+
+  
+</body>
+</html>

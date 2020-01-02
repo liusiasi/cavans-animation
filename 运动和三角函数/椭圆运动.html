@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>椭圆运动</title>
+</head>
+<style>
+  html,body{
+    margin: 0;
+    height: 100%;
+  }
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script>
+    //(x/a)²+(y/b)²=1,x = a * cosθ ;y = b * sinθ,因此使angle从0到2π,然后求出每一次绘制小球的坐标，即是椭圆运动
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    const ball = new Ball({
+      x: W/2,
+      y: H/2,
+      r: 30
+    }).render(ctx);
+
+    let r = 160;
+    let angle = 2 * Math.PI;
+    let rx = 200, ry = 80;
+
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      ctx.save()
+      ctx.translate(W/2, H/2);
+      ctx.scale(1,0.4);
+      ctx.beginPath();
+      ctx.arc(0, 0, rx, 0, 2* Math.PI);
+      ctx.stroke();
+      ctx.restore();
+      ball.x = W/2 + rx*Math.cos(angle);
+      ball.y = H/2 + ry*Math.sin(angle);
+
+      angle -= 0.05;
+      angle %= Math.PI * 2;
+      ball.render(ctx);
+
+    })()
+  </script>
+  
+</body>
+</html>
