@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>重置小球位置坐标</title>
+</head>
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script src="../assets/script/utils.js"></script>
+  <script>
+    //①检查物体是否越界;②如果发生越界，将物体位置初始化
+    //初始化小球都是从x为W/2，y为H中心处出发，向上喷涌，所以vy为负数，向左右两边散开，所以vx有正和负两种取值，y轴方向受重力加速度影响
+    //做向上抛出运动，当越界的时候重置小球的位置为初始位置，速度为新的随机数，模拟不断喷涌小球的景象
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let balls = [];
+    let g = 0.05;
+    for(let i = 0 ; i < 100 ; i++){
+      balls.push(new Ball({
+        x: W/2,
+        y: H,
+        r: Math.random() > 0.9 ? C.rp([25,40]):C.rp([15,30]),
+        fillStyle: C.createColor(),
+        vx: C.rp([-3,3]),
+        vy: C.rp([0,-10]),
+      }))
+    }
+    function ballmove(ball){
+
+      ball.vy += g;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      if(ball.x - ball.r >= W || ball.x + ball.r <= 0 ||
+      ball.y - ball.r >= H || ball.y + ball.r <= 0
+      ){
+        ball.x = W/2;
+        ball.y = H;
+        ball.vx = C.rp([-3, 3]);
+        ball.vy = C.rp([0,-10]);
+      }
+      ball.render(ctx);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      balls.forEach(ballmove);
+    })()
+  </script>
+
+</body>
+
+</html>

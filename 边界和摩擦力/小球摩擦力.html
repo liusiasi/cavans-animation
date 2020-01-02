@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>小球摩擦力</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //摩擦力两种实现方案
+    //正确方法：
+    //const friction = 0.1; speed = speed > friction ? speed - friction : 0;
+    //简单方法：
+    //const friction = 0.8; speed x= friction
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    let angle = C.toRad(30),speed = C.rp([30, 50]), friction = 2.5;
+    const ball = new Ball({
+      x: 100,
+      y: 100,
+    }).render(ctx);
+
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      // speed = speed > friction ? speed - friction : 0;
+      if(speed > 0.001){
+        console.log(speed);
+        speed *= 0.9;
+        let vx = Math.cos(angle)*speed;
+        let vy = Math.sin(angle)*speed;
+        ball.x += vx;
+        ball.y += vy;
+      }
+
+      ball.render(ctx);
+    })()
+
+  </script>
+</html>

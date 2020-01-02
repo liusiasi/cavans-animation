@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>雪花飘落</title>
+</head>
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+    background: #000;
+  }
+</style>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script src="../assets/script/utils.js"></script>
+  <script>
+    //雪花初始位置x为0-width，y为0-H，水平可以向左移动也可以向右移动，竖直方向向下飘落，当检测到越界的时候重置小球的位置，从最上方掉落
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let balls = [];
+    let g = 0.05;
+    for(let i = 0 ; i < 300 ; i++){
+      console.log(C.rp([0,-H]));
+      balls.push(new Ball({
+        x:  C.rp([0,W]),
+        y: C.rp([0,H]),
+        r: 2,
+        fillStyle: '#fff',
+        vx: C.rp([-1,1])*0.5,
+        vy: 0.5,
+      }))
+    }
+    function ballmove(ball){
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      if(ball.x - ball.r >= W || ball.x + ball.r <= 0 ||
+      ball.y - ball.r >= H || ball.y + ball.r <= 0
+      ){
+        ball.x = C.rp([0,W]);
+        ball.y =  0;
+        ball.vx =  C.rp([-1,1])*0.5;
+        ball.vy = 0.5;
+      }
+      ball.render(ctx);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      balls.forEach(ballmove);
+    })()
+  </script>
+
+</body>
+
+</html>

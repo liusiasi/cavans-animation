@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>箭头屏幕环绕</title>
+  <style>
+      body, html {
+        margin: 0;
+        height: 100%;
+      }
+      #canvas {
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.5);
+      }
+    </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Arrow.js"></script>
+  <script>
+    //设置箭头从画布左侧穿出从右侧进入，
+    //监听键盘事件，左右键旋转箭头的角度，上键使箭头加速运动，设置箭头运动的摩擦力，使松开按键的时候箭头能自动停止
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    let a = 0, vr = 0, vx = 0, vy = 0, f = 0.95;
+    const arrow = new Arrow({
+      x: W/2,
+      y: H/2,
+      w: 40,
+      h: 20,
+    });
+    window.addEventListener('keydown', function(e){
+      switch(e.keyCode) {
+        case 37:
+          vr = -5;
+          break;
+        case 39:
+          vr = 5;
+          break;
+        case 38:
+          a = 0.5;
+          break;
+      }
+    });
+    window.addEventListener('keyup', function(e){
+        a = 0;
+        vr = 0;
+      });
+    (function move(){
+      window,requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+
+      arrow.rotation += C.toRad(vr);
+      let angle = arrow.rotation;
+      
+
+      let ax = Math.cos(angle) * a;
+      let ay = Math.sin(angle) * a;
+      
+      vx += ax;
+      vy += ay;
+      
+      vx *= f;
+      vy *= f;
+
+      arrow.x += vx;
+      arrow.y += vy;
+      // 越界处理
+      if(arrow.x - arrow.w / 2 >= W){
+        arrow.x = 0 - arrow.w / 2;
+      }else if(arrow.x + arrow.w/2 <= 0){
+        arrow.x = W + arrow.w/2;
+      }
+
+      if(arrow.y - arrow.h / 2 >= H){
+        arrow.y = 0 - arrow.h / 2;
+      }else if(arrow.y + arrow.h/2 <= 0){
+        arrow.y = H + arrow.h/2;
+      }
+    
+      arrow.render(ctx);
+
+    })()
+
+  </script>  
+</body>
+</html>

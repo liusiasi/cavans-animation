@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>小球边界反弹</title>
+</head>
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script src="../assets/script/utils.js"></script>
+  <script>
+    //①检查物体是否越界;②如果发生越界，那么将物体置回边界;③随物体的速度向量取反
+    //让小球从中间开始向四周飞散，当碰到边界的时候反弹边界方向的速度，碰到水平边界，将vx取反，碰到竖直方向边界，将vy取反。
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let balls = [];
+    for(let i = 0 ; i < 10 ; i++){
+      balls.push(new Ball({
+        x: W/2,
+        y: H/2,
+        fillStyle: C.createColor(),
+        r: C.rp([30, 40]),
+        vx: C.rp([-6, 6]),
+        vy: C.rp([-6, 7])
+      }))
+    }
+    function ballmove(ball,index){
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      if(ball.x + ball.r >= W 
+      ){
+        ball.x = W - ball.r;
+        ball.vx *= -1;
+      }
+      if( ball.x - ball.r <= 0
+      ){
+        ball.x = ball.r;
+        ball.vx *= -1;
+      }
+      if(ball.y + ball.r >= H ){
+        ball.y = H - ball.r;
+        ball.vy *= -1
+      }
+      if( ball.y - ball.r <= 0){
+        ball.y = ball.r;
+        ball.vy *= -1
+      }
+      ball.render(ctx);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      balls.forEach(ballmove);
+    })()
+  </script>
+
+</body>
+
+</html>

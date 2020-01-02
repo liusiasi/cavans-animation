@@ -27,3 +27,16 @@ C.toRad = function(angle){
 C.toAngle = function(rad){
   return rad * 180 / Math.PI
 }
+
+//生成随机数
+C.rp = function(arr, int){
+  const max = Math.max(...arr);
+  const min = Math.min(...arr);
+  const num = Math.random()* (max-min) + min;
+  return int ? Math.round(num) : num;
+}
+
+//生成随机颜色
+C.createColor = function(){
+  return `rgb(${C.rp([55, 255], true)}, ${C.rp([55, 255], true)}, ${C.rp([55, 255], true)})`;
+}
