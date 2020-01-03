@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>缓动基本原理</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    // ①为运动确定一个比例系数，这个系数是0-1之间的小数
+    // ②计算物体与目标点之间的距离
+    // ③计算加速度 加速度= 距离x比例系数
+    // ④用当前位置加上速度来计算新的位置
+    // ⑤重复上面步骤
+    //多小球的弹动，拖拽其中一个小球，被拖拽的小球不会产生弹动的效果，没有被拖拽的小球就会产生弹动的效果，以其他小球为目标。
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 1200;
+    let H = canvas.height = 800;
+
+    let spring = 0.03 , friction = 0.97;
+    let springLength = 200;
+    let mouse = C.getOffset(canvas);
+    let balls = [];
+    let draggedBall = null;
+
+    for(let i = 0 ; i < 8 ; i++){
+      balls.push(new Ball({
+        x: C.rp([50, W - 50]),
+        y: C.rp([50, H- 50]),
+        r: 30,
+      }))
+    }
+
+    canvas.addEventListener('mousedown',function(e){
+      for(itemball of balls){
+        if(itemball.isPoint(mouse)){
+          itemball.dragged = true;
+          draggedBall = itemball;
+        }
+      }
+    });
+    canvas.addEventListener('mousemove',function(e){
+      if(draggedBall){
+        draggedBall.x = mouse.x;
+        draggedBall.y = mouse.y;   
+      }
+   
+    });
+
+    canvas.addEventListener('mouseup',function(e){
+        draggedBall.dragged = false;
+        draggedBall = null;
+    });
+
+    function springTo(b1, b2){
+      let dx = b2.x - b1.x;
+      let dy = b2.y - b1.y;
+      let angle = Math.atan2(dy,dx);
+      let targetX =  b2.x - Math.cos(angle) * springLength;
+      let targetY =  b2.y - Math.sin(angle) * springLength;
+
+      b1.vx += (targetX - b1.x) * spring;
+      b1.vy += (targetY - b1.y) * spring;
+
+      b1.vx *= friction;
+      b1.vy *= friction;
+
+      b1.x += b1.vx;
+      b1.y += b1.vy;
+    }
+
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+
+      //如果ball1没有被拖动，它将产生弹动效果，目标为ball2
+      // if(!ball1_draging){
+      //   springTo(ball1, ball2);
+      //   springTo(ball1, ball3);
+
+      // }
+      // if(!ball2_draging){
+      //   springTo(ball2, ball1);
+      //   springTo(ball2, ball3);
+
+      // }
+      
+      // ctx.beginPath();
+      // ctx.lineWidth = 2;
+      // ctx.strokeStyle = 'rgb(238, 58, 166)';
+      // ctx.lineTo(ball1.x, ball1.y);
+      // ctx.lineTo(ball2.x,ball2.y);
+      // ctx.lineTo(ball3.x,ball3.y);
+      // ctx.closePath();
+
+      // ctx.stroke();
+
+      // ball1.render(ctx);
+      // ball2.render(ctx);
+
+
+      balls.forEach(function(item,index){
+        if(!item.dragged){
+          let itemballs = balls.slice();
+          itemballs.splice(index, 1);
+          for(let itemball of itemballs){
+            springTo(item, itemball);
+          }
+        }
+        item.render(ctx);
+      })
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgb(238, 58, 166)';
+      for(let itemball of balls){
+         ctx.lineTo(itemball.x, itemball.y);
+
+      }
+
+      ctx.closePath();
+      ctx.stroke();
+
+      
+
+    })()
+
+  </script>
+</html>

@@ -24,6 +24,7 @@
 
   <script>
     //使小球拖拽停止的时候，按照最后一帧的速度大小和方向运动。速度向量 = 最后一帧的结束位置 - 最后一帧的起始位置大小，方向 拖拽物体的方向
+    //setSpeed也就是计算速度向量的函数
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 

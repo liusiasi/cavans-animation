@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>小球的拖拽缓动</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    // ①为运动确定一个比例系数，这个系数是0-1之间的小数
+    // ②计算物体与目标点之间的距离
+    // ③计算速度 速度= 距离x比例系数
+    // ④用当前位置加上速度来计算新的位置
+    // ⑤重复上面步骤
+    //拖拽小球，松开小球的时候，小球缓动回中心点,以中心点为target，求比例速度
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let mouse = C.getOffset(canvas);
+    const ball = new Ball({
+      x: W/2,
+      y: H/2,
+      r: 40
+    }).render(ctx);
+
+    let dx = 0, dy = 0;
+    let mouseMove = false,easing = 0.05;
+    canvas.addEventListener('mousedown', function (e){
+      if(ball.isPoint(mouse)){
+        mouseMove = true;
+        dx = mouse.x - ball.x;
+        dy = mouse.y - ball.y;
+        canvas.addEventListener('mousemove', moveBallFn);
+        canvas.addEventListener('mouseup', upBallFn);
+      }
+    });
+    function moveBallFn(){
+      ball.x = mouse.x - dx;
+      ball.y = mouse.y - dy;
+    }
+    function upBallFn(){
+      mouseMove = false;
+      canvas.removeEventListener('mousemove', moveBallFn);
+      canvas.removeEventListener('mouseup', upBallFn);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      if(!mouseMove){
+        let dx = W/2- ball.x  ;
+        let dy = H/2-ball.y ;
+
+        let vx = dx * easing;
+        let vy = dy * easing;
+
+        ball.x += vx;
+        ball.y += vy;
+      }
+      ball.render(ctx);
+    })()
+
+  </script>
+</html>

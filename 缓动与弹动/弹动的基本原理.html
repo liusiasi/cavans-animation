@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>缓动基本原理</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    // ①为运动确定一个比例系数，这个系数是0-1之间的小数
+    // ②计算物体与目标点之间的距离
+    // ③计算加速度 加速度= 距离x比例系数
+    // ④用当前位置加上速度来计算新的位置
+    // ⑤重复上面步骤
+    //比例加速度，使小球向中心点弹动。求出到目标点的距离在乘以系数就为运动加速度，为了让运动停止，引入摩擦系数
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    let spring = 0.05 , friction = 0.9, targetX = W/2, targetY = H/2;
+    const ball = new Ball({
+      x: 100,
+      y: H/2,
+    }).render(ctx);
+
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      
+      let dx = targetX - ball.x;
+      let ax = dx * spring;
+
+      ball.vx += ax;
+      ball.vx *= friction;
+      ball.x += ball.vx;
+
+      ball.render(ctx);
+    })()
+
+  </script>
+</html>
