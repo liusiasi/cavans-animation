@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>矩形碰撞检测</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+    }
+    #canvas {
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    }
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="../assets/components/Box.js"></script>
+    <script src="../assets/script/utils.js"></script>
+    <script>
+        //矩形的碰撞检测，抽象出一个公共的rectDuang函数，这个函数接受两个矩形为参数，两个矩形装上的条件如下
+        //x和y坐标为矩形的左上角的坐标
+        //矩形1的最左边的临界坐标为矩形2的最优边，矩形1的最右边的临界边为矩形2的最左边；矩形1的最上边的临界边矩形2的最下边，矩形1的最下边的临界边为矩形2的最上边；
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let W = canvas.width = 800;
+        let H = canvas.height = 600;
+
+        let mouse = C.getOffset(canvas);
+        let draged1 = false;
+        let draged2 = false;
+        let disX,dixY;
+
+        const box1 = new Box({
+            x:C.rp([0,W-50]),
+            y:C.rp([0,H-30]),
+            w:50,
+            h:30,
+            fillStyle: "#ff0000"
+        })
+
+        const box2 = new Box({
+            x:C.rp([0,W-50]),
+            y:C.rp([0,H-30]),
+            w:50,
+            h:30,
+            fillStyle: "#8000ff"
+        })
+
+        canvas.addEventListener('mousedown', function(e){
+            if(box1.isPoint(mouse)){
+                draged1 = true;
+                disX = mouse.x - box1.x;
+                disY = mouse.y - box1.y;
+            }
+            if(box2.isPoint(mouse)){
+                draged2 = true;
+                disX = mouse.x - box2.x;
+                disY = mouse.y - box2.y;
+            }
+        });
+
+        canvas.addEventListener('mousemove',function(e){
+            if(draged1){
+                box1.x = mouse.x - disX;
+                box1.y = mouse.y - disY;
+            }
+            if(draged2){
+                box2.x = mouse.x - disX;
+                box2.y = mouse.y - disY;
+            }
+        });
+
+        canvas.addEventListener('mouseup',function(e){
+            draged1 = draged2 = false;
+        });
+
+        (function move(){
+            window.requestAnimationFrame(move);
+            ctx.clearRect(0,0,W,H);
+
+            if(C.rectDuang(box1, box2)){
+                console.log('撞上了')
+            }
+            box1.render(ctx);
+            box2.render(ctx);
+        })()
+    </script>
+</body>
+</html>

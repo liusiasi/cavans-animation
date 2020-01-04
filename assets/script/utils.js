@@ -40,3 +40,9 @@ C.rp = function(arr, int){
 C.createColor = function(){
   return `rgb(${C.rp([55, 255], true)}, ${C.rp([55, 255], true)}, ${C.rp([55, 255], true)})`;
 }
+
+//矩形之间的碰撞检测，x和y坐标为矩形的左上角的坐标
+//矩形1的最左边的临界坐标为矩形2的最优边，矩形1的最右边的临界边为矩形2的最左边；矩形1的最上边的临界边矩形2的最下边，矩形1的最下边的临界边为矩形2的最上边；
+C.rectDuang = function(rect1, rect2){
+  return (rect1.x + rect1.w >= rect2.x && rect1.x <= rect2.x + rect2.w && rect1.y <= rect2.y + rect2.h && rect1.y + rect1.h >= rect2.y);
+}

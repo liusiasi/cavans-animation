@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>矩形碰撞检测</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+    }
+    #canvas {
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    }
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="../assets/components/Box.js"></script>
+    <script src="../assets/script/utils.js"></script>
+    <script>
+        //任意矩形从最上方掉落，如果和其他的矩形碰撞，或者落在了最下方，就停止移动，在生成一个新的矩形。
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let W = canvas.width = 800;
+        let H = canvas.height = 600;
+        let balls = [];
+        let g = 0.01,activeBox = createNewBox();
+     
+        
+        function createNewBox(){
+            const ball =  new Box({
+                x:C.rp([0,W-50]),
+                y:0,
+                w:C.rp([30,60]),
+                h:C.rp([30,60]),
+                fillStyle: C.createColor(),
+            });
+            balls.push(ball);
+            return ball;
+        };
+        
+        document.addEventListener('keydown', function(e) {
+            console.log('keydown');
+            switch (e.keyCode) {
+                case 37:
+                    activeBox.x += -5;
+                    break;
+                case 39:
+                    activeBox.x += 5;
+                    break;
+                case 40:
+                    g = 0.1;
+                    break;  
+            }
+        });
+        document.addEventListener('keyup', function(e){
+            g = 0.01;
+        });
+
+        (function move(){
+            window.requestAnimationFrame(move);
+            ctx.clearRect(0,0,W,H);
+            activeBox.vy += g;
+            activeBox.y += activeBox.vy;
+
+            if(activeBox.y+activeBox.h >= H){
+                activeBox.y = H - activeBox.h;
+                activeBox = createNewBox();
+            }
+    
+            balls.forEach((item) => {
+                if(item != activeBox && C.rectDuang(activeBox,item)){
+                    activeBox.y = item.y - activeBox.h;
+                    activeBox = createNewBox();
+                }
+                item.render(ctx);
+            })
+
+        })()
+    </script>
+</body>
+</html>
