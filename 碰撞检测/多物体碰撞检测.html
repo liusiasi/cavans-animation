@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>多物体碰撞检测</title>
+</head>
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script src="../assets/script/utils.js"></script>
+  <script>
+    //在页面生成多个小球，小球碰到边界会反弹，调用checkBallBounce函数
+    //小球和其他小球碰撞会反弹，调用checkHit，双重循环，检测每一个小球和其他的所有的小球的碰撞的结果，相当于求所有小球之间的组合，做弹动运动，运动的target是两个小球没有碰撞之前
+    //距离刚好为两个小球半径之和的状态
+    //最后渲染每一个小球
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    let balls = [];
+    let bounce = -0.4,spring = 0.02,num = 200;
+    let mouse = C.getOffset(canvas);
+    let firstBallR = 100, bigBall = false;
+
+    for(let i = 0 ; i < num ; i++){
+      balls.push(new Ball({
+        x: C.rp([0, W]),
+        y: C.rp([0, H]),
+        fillStyle: C.createColor(),
+        r: !i ? firstBallR : 10 ,
+        vx: C.rp([-3, 3]),
+        vy: C.rp([-3, 3])
+      }))
+    }
+
+    canvas.addEventListener('mousemove',function(e){
+      balls[0].x = mouse.x;
+      balls[0].y = mouse.y;
+    });
+
+    canvas.addEventListener('click',function(e){
+      firstBallR = firstBallR < H/2 ? firstBallR + 50 : 100;
+      balls[0].r = firstBallR;
+    })
+
+    canvas.addEventListener('mouseover', function (e){
+      bigBall = true;
+    });
+    
+    canvas.addEventListener('mouseout', function (e){
+      bigBall = false;
+    });
+    function checkHit(ball,i){
+      if(!bigBall && !i) return;
+      for(let j = i+1; j < num ; j++){
+        let ball2 = balls[j]
+        let disX = ball2.x - ball.x;
+        let disY = ball2.y - ball.y;
+        const dist = C.getDist(ball2.x,ball2.y,ball.x,ball.y);
+        const minDist = ball2.r + ball.r;
+        if(dist < minDist){
+          let targetX = minDist * (disX / dist) + ball.x;
+          let targetY = minDist * (disY /dist)+ ball.y;
+          let ax = (targetX-ball2.x) * spring;
+          let ay = (targetY-ball2.y) * spring;
+          ball.vx -= ax;
+          ball.vy -= ay;
+          ball2.vx += ax;
+          ball2.vy += ay;
+        }
+      }
+    }
+    function moveBall(ball,i){
+      if(!i) return;
+      C.checkBallBounce(ball,W,H,bounce);
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+    }
+
+    function renderBall(item,i){
+      if(!i) return;
+      item.render(ctx);
+    }
+    (function move(){
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0,0,W,H);
+      balls.forEach(checkHit);
+      balls.forEach(moveBall);
+      balls.forEach(renderBall);
+    })()
+  </script>
+
+</body>
+
+</html>

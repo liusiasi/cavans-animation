@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>光线投影法检测碰撞</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+    }
+    #canvas {
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    }
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="../assets/components/Ball.js"></script>
+    <script src="../assets/components/Box.js"></script>
+    <script src="../assets/script/utils.js"></script>
+    <script>
+        //光线投影法检测，检测两条直线是否有交点，判断是否会发生碰撞
+        //检测交点并且交点在一定范围内则会发生碰撞
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let W = canvas.width = 800;
+        let H = canvas.height = 600;
+
+        let startX,startY;
+        let mouse = C.getOffset(canvas);
+        let moving = false;
+        let easing = 0.03;
+
+        let g = 0.3, f = 0.98;
+
+        const ball = new Ball({
+          x: 50,
+          y: 500,
+          r: 30,
+          fillStyle: 'rgb(70, 227, 51)'
+        });
+
+        const box = new Box({
+          x: 620,
+          y: 480,
+          w: 120,
+          h: 70
+        });
+
+        function drawLine(){
+          ctx.beginPath();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = 'rgb(251, 78, 104)';
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.lineTo(ball.x, ball.y);
+          ctx.stroke();
+        };
+
+        function checkHit(){
+          let k1 = (ball.x - startX) /(ball.y - startY) ;
+          let b1 = ball.y - k1 * ball.x;
+          let k2 = 0;
+          let b2 = ball.y;
+          let cx = (b1-b2) / (k2-k1);
+          if(cx - ball.r/2 > box.x && cx + ball.r / 2 < box.x + box.w && ball.y - ball.r > box.y){
+            console.log('小球进去了！');
+            return true;
+          }
+        }
+
+        function ballMove(){
+          ball.vx *= f;
+          ball.vy *= f;
+          ball.vy += g;
+          ball.x += ball.vx;
+          ball.y += ball.vy;
+          //检测碰撞和边界使小球归位
+          if(checkHit() || ball.x - ball.r > W || ball.x + ball.r < 0 || ball.y - ball.r > H || ball.y + ball.r <0){
+            moving = false;
+            ball.x = 50;
+            ball.y = 500;
+          }
+
+          startX = ball.x;
+          startY = ball.y;
+  
+        };
+
+        canvas.addEventListener('click', function(e){
+          moving = true;
+          ball.vx = (mouse.x - ball.x) * easing;
+          ball.vy = (mouse.y - ball.y) * easing;
+          startX = ball.x;
+          startY = ball.y;
+          
+          
+        });
+        (function move(){
+            window.requestAnimationFrame(move);
+            ctx.clearRect(0,0,W,H);
+            ctx.beginPath();
+            if(moving){
+              ballMove();
+            }else{
+              drawLine();
+            }
+            ball.render(ctx);
+            box.render(ctx);
+        })()
+    </script>
+</body>
+</html>

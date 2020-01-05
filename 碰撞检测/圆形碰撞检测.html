@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>矩形碰撞检测</title>
+</head>
+<style>
+    body, html{
+        margin: 0;
+        height: 100%;
+    }
+    #canvas {
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    }
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="../assets/components/Ball.js"></script>
+    <script src="../assets/script/utils.js"></script>
+    <script>
+        //圆形碰撞检测，抽象出一个公共的函数getDist获取两点的之间的距离，两个圆心之间的距离小于半径之和，那么就发生了碰撞。
+        
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let W = canvas.width = 800;
+        let H = canvas.height = 600;
+
+        let mouse = C.getOffset(canvas);
+        let draged1 = false;
+        let draged2 = false;
+        let disX,dixY;
+
+        const ball1 = new Ball({
+            x:C.rp([0,W-50]),
+            y:C.rp([0,H-30]),
+            r:40,
+            fillStyle: "#ff0000"
+        })
+
+        const ball2 = new Ball({
+            x:C.rp([0,W-20]),
+            y:C.rp([0,H-20]),
+            r:40,
+            fillStyle: "#8000ff"
+        })
+
+        canvas.addEventListener('mousedown', function(e){
+            if(ball1.isPoint(mouse)){
+                draged1 = true;
+                disX = mouse.x - ball1.x;
+                disY = mouse.y - ball1.y;
+            }
+            if(ball2.isPoint(mouse)){
+                draged2 = true;
+                disX = mouse.x - ball2.x;
+                disY = mouse.y - ball2.y;
+            }
+        });
+
+        canvas.addEventListener('mousemove',function(e){
+            if(draged1){
+                ball1.x = mouse.x - disX;
+                ball1.y = mouse.y - disY;
+            }
+            if(draged2){
+                ball2.x = mouse.x - disX;
+                ball2.y = mouse.y - disY;
+            }
+        });
+
+        canvas.addEventListener('mouseup',function(e){
+            draged1 = draged2 = false;
+        });
+
+        (function move(){
+            window.requestAnimationFrame(move);
+            ctx.clearRect(0,0,W,H);
+            if(C.getDist(ball1.x,ball1.y,ball2.x,ball2.y) <= ball1.r+ball2.r){
+                console.log('撞上了')
+            }
+            ball1.render(ctx);
+            ball2.render(ctx);
+        })()
+    </script>
+</body>
+</html>
