@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>斜面物体反弹</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      height: 100%;
+    }
+
+    #canvas {
+      background-color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Line.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //处理和斜面之间的反弹，不好处理，将其转化成处理和平面之间的反弹，利用高级坐标旋转将小球围绕斜面初始点旋转，将整个环境也许旋转，
+    //旋转速度向量，处理反弹，与平面的反弹就是将vy乘以反弹系数。之后再将处理的结果旋转回去。
+    //高级坐标旋转
+    // 正向坐标旋转
+    // x1 = x*cos(vr) - y*sin(vy)
+    // y1 = y*cos(vr)+ x*sin(vr)
+    // 反向坐标旋转
+    // x1 = x*cos(vr) + y*sin(vy)
+    // y1 = y*cos(vr)- x*sin(vr)
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 900;
+    let H = canvas.height = 700;
+
+    let g = 0.1, bounce = -0.9;
+
+
+    const line = new Line({
+      x: 100,
+      y: 360,
+      x1: 0,
+      y1: 0,
+      x2: 600,
+      y2: 0,
+      rotation: C.toRad(10),
+      lineWidth: 3,
+      strokeStyle: '#bb13ec',
+    });
+
+    const ball = new Ball({
+      x: 120,
+      y: 140,
+      r: 50,
+      fillStyle: '#162ce9'
+    });
+
+    let sin = Math.sin(line.rotation), cos = Math.cos(line.rotation);
+
+
+    function checkBallMove(ball) {
+      //获取小球相对于中心点的坐标
+      let rx = ball.x - line.x;
+      let ry = ball.y - line.y;
+
+      //小球旋转之后坐标
+      let x1 = rx * cos + ry * sin;
+      let y1 = ry * cos - rx * sin;
+
+      //小球的速度向量旋转
+      let vx1 = ball.vx * cos + ball.vy * sin;
+      let vy1 = ball.vy * cos - ball.vx * sin;
+
+      //检测小球和水平直线的碰撞
+      //旋转之后的坐标在斜面之内，这里的x1是相对于斜面的初始点的
+      //还需要判断在斜面之上和下面之下的两种碰撞
+      if (x1+ball.r >=line.x1 && x1-ball.r <= line.x2) {
+        if (y1 + ball.r > 0 && y1 < 0 ) {
+          y1 = -ball.r;
+          vy1 *= bounce;
+        }
+        if (y1 - ball.r < 0 && y1 > 0 ) {
+          y1 = ball.r;
+          vy1 *= bounce;
+        }
+
+      }
+
+
+      // 将整个系统旋转回初始的位置
+      rx = x1 * cos - y1 * sin;
+      ry = y1 * cos + x1 * sin;
+
+      ball.vx = vx1 * cos - vy1 * sin;
+      ball.vy = vy1 * cos + vx1 * sin;
+
+      ball.x = line.x + rx;
+      ball.y = line.y + ry;
+
+    }
+
+    (function drawFrame() {
+      window.requestAnimationFrame(drawFrame);
+
+      ctx.clearRect(0, 0, W, H);
+      ball.vy += g;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // 处理和斜面之间的反弹
+      checkBallMove(ball);
+      // 处理和画布边界之间的反弹
+      C.checkBallBounce(ball, W, H, bounce);
+
+      ball.render(ctx);
+      line.render(ctx);
+    })();
+  </script>
+</body>
+
+</html>

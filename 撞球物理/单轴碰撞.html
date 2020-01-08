@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>单轴碰撞</title>
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+    }
+    #canvas {
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+  <script>
+    //根据动能和动量定理，完全弹性碰撞之后
+    //v1' = ((m1-m2)*v1 + 2*m2*v2)/(m1+m2);
+    //v2' = ((m2-m1)*v2) + 2*m1*v1)/(m1+m2);
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+  
+    let W = canvas.width = 900;
+    let H = canvas.height = 700;
+    
+    let bound = 0.2;
+    
+    const ball1 = new Ball({
+      x: 100,
+      y: H/2,
+      fillStyle: 'rgb(226, 62, 111)',
+      r: 50,
+      m: 2,
+      vx: 3
+    });
+    const ball2 = new Ball({
+      x: W - 100,
+      y: H/2,
+      fillStyle: 'rgb(26, 159, 208)',
+      r: 30,
+      m: 1,
+      vx: -4
+    });
+
+    function drawBaseLine(){
+      ctx.beginPath();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgb(46, 221, 137)';
+      ctx.moveTo(0, H/2);
+      ctx.lineTo(W, H/2);
+      ctx.stroke();
+    }
+  
+    (function drawFrame(){
+      window.requestAnimationFrame(drawFrame);
+      ctx.clearRect(0,0,W,H);
+
+      ball1.x += ball1.vx;
+      ball2.x += ball2.vx;
+
+      let dist = Math.abs(ball1.x - ball2.x);
+      if(dist < ball1.r + ball2.r){
+        ball1.x -=  (ball1.r + ball2.r - dist) /2;
+        ball2.x +=  (ball1.r + ball2.r - dist) /2;
+        v1final = ((ball1.m-ball2.m)*ball1.vx + 2*ball2.m*ball2.vx)/(ball1.m+ball2.m);
+        v2final = ((ball2.m-ball1.m)*ball2.vx + 2*ball1.m*ball1.vx)/(ball1.m+ball2.m);
+        console.log(v1final);
+        console.log(v2final);
+        ball1.vx = v1final;
+        ball2.vx = v2final;
+      }
+
+      drawBaseLine();
+
+      ball1.render(ctx);
+      ball2.render(ctx);
+
+    })();
+  </script>
+</body>
+</html>
