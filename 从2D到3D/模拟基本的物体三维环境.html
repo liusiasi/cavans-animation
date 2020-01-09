@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>模拟基本的物体三维环境</title>
+</head>
+<style>
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+
+  #canvas {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+    background: #000;
+  }
+</style>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/components/Ball.js"></script>
+  <script src="../assets/script/utils.js"></script>
+  <script>
+    //使小球随着鼠标移动，当按键盘的上下键的时候，将小球沿着z轴方向运动，计算出3d坐标之后再向2d坐标转换
+    //需要设定消失点和观察点两个变量
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+
+    let hx = W / 2, hy = H / 2, f1 = 200;
+    //设置3d的初识坐标
+    let x = 0, y = 0, z = 0;
+
+    let mouse = C.getOffset(canvas);
+    const ball = new Ball({
+      r: 80,
+    });
+
+
+    window.addEventListener('keydown', function(e){
+      console.log(e.keyCode);
+      switch(e.keyCode) {
+        case 38: z += 5; return;
+        case 40: z -= 5; return;
+      }
+    });
+
+    (function move() {
+      window.requestAnimationFrame(move);
+      ctx.clearRect(0, 0, W, H);
+
+      //z小于-f1整个坐标系会翻转,因此要控制z不能小于-f1
+      if (z > -f1) {
+        let scale = f1 / (f1 + z);
+
+        x = mouse.x - hx;
+        y = mouse.y - hy;
+        ball.scaleX = ball.scaleY = scale;
+
+        ball.x = hx + x * scale;
+        ball.y = hy + y * scale;
+
+        ball.show = true;
+      } else {
+        ball.show = false;
+      }
+      ball.show && ball.render(ctx);
+
+    })()
+  </script>
+</body>
+
+</html>

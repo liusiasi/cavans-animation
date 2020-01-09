@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>万有引力基本原理</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    background-color: #000;
+    display: block;
+    margin: 0 auto;
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //根据万有引力公式force = G * m1 * m2 / distance^2 求出两个小球的加速度，G假定为1
+    //粒子花园，首先让所有小球先运动起来，然后有一个边界重新效果，接下来做小球之间近距离的弹动，再加入碰撞检测
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    
+    let W, H;
+    let particles = [];
+    let spring = 0.0001;
+
+    
+    function createParticles(num){
+      if(num !== particles.length){
+        particles.length = 0;
+      }
+      for(let i=0; i<num; i++){
+        const size = C.rp([3, 10]);
+        particles.push(new Ball({
+          x: C.rp([0, W]),
+          y: C.rp([0, H]),
+          r: size,
+          m: size,
+          fillStyle: '#fff',
+          vx: C.rp([-2, 2]),
+          vy: C.rp([-2,2])
+        }));
+    }
+    }
+    window.onresize = function(){
+       W = canvas.width = window.innerWidth;
+       H = canvas.height = window.innerHeight;
+       createParticles(W * H /15000);
+    }
+    window.onresize();
+
+
+    function move(ball, i){
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      for(let j=i+1; j<particles.length; j++){
+        const target = particles[j];
+        checkSpring(ball,target);
+        C.checkBallHit(ball, target);
+      }
+      if(ball.x-ball.r>W){
+        ball.x = -ball.r;
+      }else if(ball.x + ball.r <0){
+        ball.x = W + ball.r;
+      }
+
+      if(ball.y-ball.r>H){
+        ball.y = -ball.r;
+      }else if(ball.y + ball.r <0){
+        ball.y = H + ball.r;
+      }
+    }
+
+
+
+    //处理两个粒子之间的弹动效果，当粒子距离小于一定数值的时候，将产生弹动
+    function checkSpring(current,target){
+      let dx = target.x - current.x;
+      let dy = target.y - current.y;
+      let dist = Math.sqrt(dx**2 + dy**2);
+      let minDist = W/10;
+      if(dist < minDist){
+        drawLine(current, target, dist, minDist);
+        let ax = dx * spring;
+        let ay = dy * spring;
+        current.vx += ax/current.m;
+        current.vy += ay/current.m;
+        target.vx -=ax/target.m;
+        target.vy -= ay/target.m;
+      }
+    }
+
+    function drawLine(current, target, dist, minDist){
+      ctx.save();
+      ctx.lineWidth = 2*Math.max(0,(1-dist/minDist));
+      ctx.globalAlpha = Math.max(0,(1-dist/minDist));
+      ctx.strokeStyle = '#fff';
+      ctx.beginPath();
+      ctx.lineTo(current.x,current.y);
+      ctx.lineTo(target.x,target.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    
+
+
+
+    function draw(ball, i){
+      ball.render(ctx);
+    }
+
+    (function drawFrame(){
+      window.requestAnimationFrame(drawFrame);
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      particles.forEach(move);
+      particles.forEach(draw);
+    })();
+
+  </script>
+</html>

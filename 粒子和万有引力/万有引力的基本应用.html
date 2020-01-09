@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>万有引力基本原理</title>
+</head>
+<style>
+  body, html {
+    margin: 0;
+    height: 100%;
+  }
+  #canvas{
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    background: #000;
+  }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="../assets/script/utils.js"></script>
+  <script src="../assets/components/Ball.js"></script>
+
+  <script>
+    //根据万有引力公式force = G * m1 * m2 / distance^2 求出两个小球的加速度，G假定为1
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width = 800;
+    let H = canvas.height = 600;
+    
+    let particles = [], num = 100;
+    
+    for(let i=0; i<num; i++){
+      const size = C.rp([3, 10]);
+      particles.push(new Ball({
+        x: C.rp([0, W]),
+        y: C.rp([0, H]),
+        r: 10,
+        fillStyle: '#fff',
+        m: size
+      }));
+    }
+    
+    function move(ball, i){
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      for(let j=i+1; j<num; j++){
+        const target = particles[j];
+        gravitate(ball, target);
+        C.checkBallHit(ball, target);
+      }
+    }
+    
+    function gravitate(p1, p2){
+      let dx = p2.x - p1.x;
+      let dy = p2.y - p1.y;
+      let distSQ = dx**2 + dy**2;
+      let dist = Math.sqrt(distSQ);
+      let force = p1.m * p2.m / distSQ;
+      let ax = force * dx / dist;
+      let ay = force * dy / dist;
+      
+      p1.vx += ax / p1.m;
+      p1.vy += ay / p1.m;
+      p2.vx -= ax / p2.m;
+      p2.vy -= ay / p2.m;
+    }
+    
+    function draw(ball, i){
+      ball.render(ctx);
+    }
+  
+    (function drawFrame(){
+      window.requestAnimationFrame(drawFrame);
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      particles.forEach(move);
+      particles.forEach(draw);
+    })();
+
+  </script>
+</html>

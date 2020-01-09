@@ -91,9 +91,9 @@ C.checkBallHit = function (b1, b2){
 
     //旋转b1和b2的速度
     let vx1 = b1.vx * cos + b1.vy * sin;
-    let vy1 = b1.vy * sin - b1.vx * cos;
+    let vy1 = b1.vy * cos - b1.vx * sin;
     let vx2 = b2.vx * cos + b2.vy * sin;
-    let vy2 = b2.vy * sin - b2.vx * cos;
+    let vy2 = b2.vy * cos - b2.vx * sin;
 
     //求出两个小球碰撞之后的速度
     //v1' = ((m1-m2)*v1 + 2*m2*v2)/(m1+m2);
